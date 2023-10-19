@@ -1,5 +1,5 @@
 # Adjoint Bijective ZoomOut: Efficient upsampling for learned linearly-invariant embedding
-This repository is the ufficial implementation of Adjoint Bijective ZoomOut ().
+This repository is the ufficial implementation of Adjoint Bijective ZoomOut () by G.Viganò and S. Melzi.
 This code was written by Giulio Viganò (https://sites.google.com/view/gvigano/home-page).
 
 To train the networks, we refer to the repository of "Correspondence Learning via Lineraly-invariant Embedding" https://github.com/riccardomarin/Diff-FMAPs-PyTorch.
