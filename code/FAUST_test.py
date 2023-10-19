@@ -12,16 +12,16 @@ from utils.metrics import *
 
 
 
-# Loading Data
+# DATA LOADING
 Noise=False
 
+#load data
 DATA_PATH = '../data/FAUST_noise_0.01.mat'
 dd = hdf5storage.loadmat(DATA_PATH)
 if Noise is True:
     v = dd['vertices'].astype(np.float32)
 else:
     v = dd['vertices_clean'].astype(np.float32)
-
 
 #loading geodesic distance matrix (for evaluation)
 geod_load = hdf5storage.loadmat('../data/N_out.mat')
@@ -32,9 +32,7 @@ p2p_gt = np.arange(1000)
 #number of pairs considered
 n_esp=50
 
-
-
-#Loading Models
+#MODELS LOADING
 k=20
 k_tilde=30
 #BASIS and DESCRIPTORS for initialization
@@ -53,12 +51,13 @@ checkpoint = torch.load('../training/pretrained_models/basis_model_best_'+str(k_
 basis_model_zo.load_state_dict(checkpoint)
 basis_model_zo = basis_model_zo.eval()
 
-# with these parameter we can chose whic kind of conversion we want to use
+# With these parameters we can choose which kind of conversion we want to use
 bijective=True
 adj=True
 
+
 np.random.seed(2)
-#saving estimated maps and metrics for initialized maps
+#saving variables metrics for initialized maps metrics
 match_lie=np.zeros((n_esp,p2p_gt.shape[0]))
 err_lie_geod=np.zeros((n_esp,p2p_gt.shape[0]))
 err_lie_eu=np.zeros((n_esp,p2p_gt.shape[0]))
@@ -67,7 +66,7 @@ bij_lie=np.zeros((n_esp,))
 inj_lie=np.zeros((n_esp,))
 conversion_err_lie=np.zeros((n_esp,p2p_gt.shape[0]))
 
-#for refinemd maps
+#for refined maps metrics
 match_lie_OUR=np.zeros((n_esp,p2p_gt.shape[0],11))
 err_lie_OUR_geod=np.zeros((n_esp,p2p_gt.shape[0],11))
 err_lie_OUR_eu=np.zeros((n_esp,p2p_gt.shape[0],11))
@@ -75,8 +74,11 @@ ortho_lie_OUR=np.zeros((n_esp,11))
 bij_lie_OUR=np.zeros((n_esp,11))
 inj_lie_OUR=np.zeros((n_esp,11))
 
+
+#EXPERIMENTS
 for i in range(n_esp):
-    #shape selection
+    
+    #SHAPE SELECTION
     vec = np.random.randint(100,size=2)
     if bijective:
         shapen1 = vec[1]
@@ -84,17 +86,14 @@ for i in range(n_esp):
     else:
         shapen1 = vec[0]
         shapen2 = vec[1]
-    #save shapes
     v1 = v[shapen1,:,:].squeeze()
     v2 = v[shapen2,:,:].squeeze()
 
-    ####lie###
-    # Computing Basis and Descriptors
+    # Computing Basis and Descriptors for initialization
     pred_basis = basis_model_init(torch.transpose(torch.from_numpy(v[[shapen1,shapen2],:,:].astype(np.float32)),1,2))
     basis = pred_basis[0].detach().numpy()
     pred_desc = desc_model_init(torch.transpose(torch.from_numpy(v[[shapen1,shapen2],:,:].astype(np.float32)),1,2))
     desc = pred_desc[0].detach().numpy()
-    # Saving basis amd descriptors
     basis1 = np.squeeze(basis[0])
     basis2 = np.squeeze(basis[1])
     desc1 = np.squeeze(desc[0])
@@ -107,7 +106,7 @@ for i in range(n_esp):
     p2p = FM_to_p2p(fmap, basis1, basis2,adj, bijective)
     match_lie[i,:]=p2p
     
-    #evaluation module
+    #EVALUATION MODULE
     err_lie_geod[i,:] =A_geod[(p2p, p2p_gt)]
     if bijective: 
         err_lie_eu[i,:] = np.sqrt(np.sum(np.square(v2[p2p_gt.astype(np.int32)] - v2[p2p,:]),1))    #euclidean error
@@ -117,6 +116,7 @@ for i in range(n_esp):
     bij_lie[i]=eval_bijectivity(p2p,p2p_gt)
     ortho_lie[i]=eval_orthogonality(fmap)
 
+    #REFINEMENT
     # Computing Basis and Descriptors for refinement
     pred_basis_zo = basis_model_zo(torch.transpose(torch.from_numpy(v[[shapen1,shapen2],:,:].astype(np.float32)),1,2))
     basis_zo = pred_basis_zo[0].detach().numpy()
@@ -127,12 +127,13 @@ for i in range(n_esp):
     
     fmap_zo = p2p_to_FM(p2p, basis1_zo[:,:k], basis2_zo[:,:k],bijective)
     ortho_lie_OUR[i,0]=eval_orthogonality(fmap_zo)
-
-    #faccio l'iterazione
+    
+    #algorithm Iteration
     for l in range(k,k_tilde):
         p2p_zo = FM_to_p2p(fmap_zo,basis1_zo[:,:l], basis2_zo[:,:l],adj,bijective)
         match_lie_OUR[i,:,l-k]=p2p_zo
-        #evaluation module
+        
+        #intermidiatee evaluation
         err_lie_OUR_geod[i,:,l-k] =A_geod[(p2p_zo, p2p_gt)]
         if bijective: 
             err_lie_OUR_eu[i,:,l-k] = np.sqrt(np.sum(np.square(v2[p2p_gt.astype(np.int32)] - v2[p2p_zo,:]),1))    #euclidean error
@@ -144,9 +145,12 @@ for i in range(n_esp):
         fmap_zo = p2p_to_FM(p2p_zo, basis1_zo[:,:l+1], basis2_zo[:,:l+1],bijective)
         ortho_lie_OUR[i,l+1-k]=eval_orthogonality(fmap_zo)
 
+    
     p2p_zo = FM_to_p2p(fmap_zo,basis1_zo, basis2_zo,adj,bijective)
     match_lie_OUR[i,:,l+1-k]=p2p_zo
-    #evaluation module
+    
+
+    #EVALUATION MODULE
     err_lie_OUR_geod[i,:,l+1-k] =A_geod[(p2p_zo, p2p_gt)]
     if bijective: 
         err_lie_OUR_eu[i,:,l+1-k] = np.sqrt(np.sum(np.square(v2[p2p_gt.astype(np.int32)] - v2[p2p_zo,:]),1))    #euclidean error
