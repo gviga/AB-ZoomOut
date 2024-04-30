@@ -1,4 +1,8 @@
+
+
 # Adjoint Bijective ZoomOut: Efficient upsampling for learned linearly-invariant embedding
+
+![teaser github](https://github.com/gviga/AB-ZoomOut/assets/95035641/405f8e13-ff9c-4820-b235-ad6f156010fb)
 This repository is the official implementation of Adjoint Bijective ZoomOut, by G.Viganò and S. Melzi.
 This code was written by Giulio Viganò (https://sites.google.com/view/gvigano/home-page).
 
