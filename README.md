@@ -1,18 +1,23 @@
 # Adjoint Bijective ZoomOut: Efficient upsampling for learned linearly-invariant embedding
-This repository is the official implementation of Adjoint Bijective ZoomOu, by G.Viganò and S. Melzi.
+This repository is the official implementation of Adjoint Bijective ZoomOut, by G.Viganò and S. Melzi.
 This code was written by Giulio Viganò (https://sites.google.com/view/gvigano/home-page).
 
-To train the networks, we refer to the repository of "Correspondence Learning via Lineraly-invariant Embedding" https://github.com/riccardomarin/Diff-FMAPs-PyTorch.
-You can find a pre-trained version of the network in the training repository.
+The algorithm goal is to refine maps to solve the correspondence problem in the case of point clouds.
+In particular, this algorithm is designed to refine maps in case of Learned lienraly invariant embedding.
+For this reason we report here the code to compute these embeddings with the following backbones:
+
+- PointNet, as in ( https://arxiv.org/abs/2010.13136, https://www.boa.unimib.it/handle/10281/456707).
+- Pointnet++, as in (https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4772787).
+- DiffusionNet
+- Deltaconv
+
+For the original implementation of the code to train the networks, we refer to the repository of "Correspondence Learning via Lineraly-invariant Embedding" https://github.com/riccardomarin/Diff-FMAPs-PyTorch.
+You can find a pre-trained version of some of the network in the training repository.
 
 To replicate the Paper's results on the FAUST dataset, download the data from https://github.com/riccardomarin/Diff-FMAPs-PyTorch, put the FAUST file in the data folder, and run FAUST_test.py.
-In the folder trained, you can find files and pre-trained models to train the models with Pointnet and Pointnet++ backbones. The details on the choice can be found in our latest work ().
-
-
-
 
 # Reference
-If you use this code, please cite our paper.
+If you use this code, please cite our works.
 
 @inproceedings {10.2312:stag.20231293,
 booktitle = {Smart Tools and Applications in Graphics - Eurographics Italian Chapter Conference},
